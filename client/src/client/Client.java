@@ -2,6 +2,7 @@ package client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.LinkedHashMap;
 
 import freshInsuranceVisitor.ApprovalVisitor;
@@ -11,6 +12,24 @@ import server.ServerIF;
 
 public class Client {
 	public static final int RE_PRINT_MENU_COUNT = 1;
+	public static final int SCOPE_NONE = -2;
+	public static int getInputInteger(BufferedReader objReader, int scope) throws IOException {
+		int retVal;
+		while(true) {
+			try {
+				retVal = Integer.parseInt(objReader.readLine().trim());
+				if(scope != SCOPE_NONE) {
+					if(0 >= retVal || scope < retVal) {
+						System.out.print("올바르지 않은 입력입니다. 다시 입력하세요: ");
+						continue;
+					}
+				}
+				return retVal;
+			}catch(NumberFormatException e){
+				System.out.print("올바르지 않은 입력입니다. 다시 입력하세요: ");
+			}			
+		}
+	}
 
 	public void printMenu() {
 		System.out.println("***********************MENU***********************");
@@ -32,7 +51,7 @@ public class Client {
 			System.out.println((type.ordinal() + 1) + ". " + type.name());
 		}
 		System.out.print("입력 (예: 1, 2, 3): ");
-		int typeInput = Integer.parseInt(objReader.readLine().trim()) - 1; // 1을 빼서 0-based index로 만듦
+		int typeInput = getInputInteger(objReader, InsuranceType.values().length) -1;
 
 		// 입력된 값으로 InsuranceType 객체 생성
 		// exception 처리 보강 예정
@@ -46,7 +65,8 @@ public class Client {
 			System.out.println((termPeriod.ordinal() + 1) + ". " + termPeriod.name());
 		}
 		System.out.print("입력 (예: 1, 2, 3): ");
-		int termInput = Integer.parseInt(objReader.readLine().trim()) - 1;
+		int termInput = getInputInteger(objReader, TermPeriod.values().length) -1;
+
 		// exception 처리 보강 예정
 		TermPeriod selectedTerm = TermPeriod.values()[termInput];
 		System.out.println("선택된 보험 기간: " + selectedTerm.getName());
@@ -92,25 +112,14 @@ public class Client {
 	}
 
 	public void approvalNewInsurance(ServerIF server, BufferedReader objReader)
-			throws NumberFormatException, IOException {
-		System.out.println("승인할 신규 보험 번호를 입력하여 주십시오.");
-		// 신규보험 목록 출력
-		System.out.println(server.getFreshInsuranceList().getMessage());
-		System.out.print("입력 (예: 0, 1, 2): ");
-		int selectedInsuranceID = Integer.parseInt(objReader.readLine().trim());
-
-		// 특정 보험에서 처리할 수 있는 일 리스트 출력
-		// ex_보험 관리자 승인 / 보험 교육 승인
-		System.out.println("처리 가능 목록: 원하시는 번호를 입력하여 주십시오.");
-		System.out.println(server.getFreshInsuranceProcessList(selectedInsuranceID).getMessage());
-		// 현재 서버에서 보험 승인 강제로 출력 중임(데이터 없음)
-		System.out.print("입력 (예: 0, 1, 2): ");
-		int selectedTaskIndex = Integer.parseInt(objReader.readLine().trim());
-
-		// visitor pattern
-		ApprovalVisitor visitor = new ApprovalVisitor(server, objReader);
-		visitor.visitInsuranceApprovalProcess(selectedInsuranceID);
-
+			throws IOException, RemoteException{
+		/*
+		 * 신규 보험 승인부
+		 * 
+		 * visitor pattern 사용으로 해당 메소드에서는 visitor를 호출만 한다.
+		 */
+		ApprovalVisitor visitor = new ApprovalVisitor();
+		visitor.visitInsuranceApprovalProcess(server, objReader);
 	}
 
 }

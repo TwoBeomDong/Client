@@ -33,6 +33,10 @@ public class CMain {
 					case "2":
 						client.approvalNewInsurance(server, objReader);
 						break;
+					case "3":
+						System.out.println("준비중인 메뉴입니다.");
+					case "menu":
+						client.printMenu();
 					default:
 						failNum++;
 						break;

@@ -1,9 +1,11 @@
 package freshInsuranceVisitor;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.rmi.RemoteException;
 
-public interface FreshInsuranceVisitor {
+import server.ServerIF;
 
-	public void visitInsuranceApprovalProcess(int insuranceId) throws RemoteException;
-	
+public interface FreshInsuranceVisitor {
+	public void visitInsuranceApprovalProcess(ServerIF server, BufferedReader objReader) throws IOException, RemoteException;
 }
